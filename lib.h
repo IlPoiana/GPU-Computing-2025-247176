@@ -11,6 +11,10 @@ struct matrix{
     int * col;
 };
 
+/**
+ * @brief (x,y,n,row,col,val arrays)
+ * 
+ */
 struct int_matrix {
     int x;
     int y;
@@ -23,7 +27,7 @@ struct int_matrix {
 
 void PRINT_INT_MTX(struct int_matrix mtx){
     printf("x: %d\ny: %d\nn: %d\n", mtx.x, mtx.y, mtx.n);
-    int val = 1;
+    int val = 0;
     for(int i = 0; i< mtx.n; i++){
         if(mtx.row[i] > val){
             val = mtx.row[i];
@@ -36,7 +40,7 @@ void PRINT_INT_MTX(struct int_matrix mtx){
 }
 
 /**
- * @brief Supposing it's a sqare matrix
+ * @brief Supposing it's a square matrix
  * 
  */
 #define PRINT_RESULT_MATRIX(MAT, NAME, DIM) {    \
@@ -241,4 +245,46 @@ struct int_matrix import_int_matrix(char * file_path){
     //switch col and row
     struct int_matrix sm = {x,y,n,col, row, val};
     return sm;  
+}
+
+struct int_matrix gen_rnd_COO(int x, int y, int p, int binary){
+    if(binary<1){
+        printf("passed an invalid binary argument\n");
+        struct int_matrix err = {0,0,0,0,0,0};
+        return err;
+    }
+
+    int max_v = x * y;
+    int * val = (int*)malloc(sizeof(int) * max_v);
+    int * row = (int*)malloc(sizeof(int) * max_v);
+    int * col = (int*)malloc(sizeof(int) * max_v);
+    
+    int count = 0;
+    int v_buff = 0;
+
+    for(int i = 0; i < max_v;i++){
+        v_buff = rand()%p;
+        if(v_buff == 0){
+            if(binary == 1){
+                val[count] = 1;
+            }
+            else{
+                val[count] = (rand() % binary) + 1; 
+            }
+            row[count] = i / y; 
+            col[count] = abs(y - i) % y;
+            count = count + 1;
+        }    
+    }
+    int * fval = (int*)malloc(sizeof(int) * count);
+    int * frow = (int*)malloc(sizeof(int) * count);
+    int * fcol = (int*)malloc(sizeof(int) * count);
+    for( int i = 0; i< count; i++){
+        fval[i] = val[i];
+        frow[i] = row[i];
+        fcol[i] = col[i];
+    }
+
+    struct int_matrix mtx = {x,y,count,frow,fcol,fval};
+    return mtx;
 }
