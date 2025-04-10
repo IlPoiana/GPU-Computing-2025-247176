@@ -1,1 +1,4 @@
 obj/*
+*.err
+*.out
+obj/
