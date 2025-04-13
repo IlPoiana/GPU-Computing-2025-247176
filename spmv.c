@@ -91,7 +91,7 @@ int main(int argc, char *args[]){
         //all 1 vector len = col, remember that mtx starts from 1
         
         int r_idx = 0;
-        PRINT_INT_MTX(mtx);
+        PRINT_INT_MTX(mtx,COO);
         printf("start looping\n");
         for(int i = 0; i< tot; i++){
             

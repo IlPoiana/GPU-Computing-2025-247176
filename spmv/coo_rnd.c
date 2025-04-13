@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 #include <math.h>
-#include "lib.h"
+#include "../lib.h"
 
 
 int main(int argc, char *args[]){
@@ -32,7 +32,7 @@ int main(int argc, char *args[]){
    
 
     struct int_matrix mtx = gen_rnd_COO(row_n, col_n,p,binary);
-    PRINT_INT_MTX(mtx);
+    PRINT_INT_MTX(mtx, COO);
     
     printf("Running sparse matrix multiplication between a 1 vector and a integer value matrix\n");
     

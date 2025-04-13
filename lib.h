@@ -3,6 +3,9 @@
 #include <string.h>
 #include <math.h>
 
+#define COO 0
+#define CSR 1
+
 struct matrix{
     int x;
     int y;
@@ -25,16 +28,45 @@ struct int_matrix {
 };
 
 
-void PRINT_INT_MTX(struct int_matrix mtx){
+void PRINT_INT_MTX(struct int_matrix mtx, int FORMAT){
     printf("x: %d\ny: %d\nn: %d\n", mtx.x, mtx.y, mtx.n);
-    int val = 0;
-    for(int i = 0; i< mtx.n; i++){
-        if(mtx.row[i] > val){
-            val = mtx.row[i];
-            printf("-----\n");
+    if(FORMAT == COO){
+        printf("format COO\n");
+        int val = 0;
+        for(int i = 0; i< mtx.n; i++){
+            if(mtx.row[i] > val){
+                val = mtx.row[i];
+                printf("-----\n");
+            }
+            printf("[%d,%d] = %d\n",mtx.row[i],mtx.col[i], mtx.val[i]);
+            
         }
-        printf("[%d,%d] = %d\n",mtx.row[i],mtx.col[i], mtx.val[i]);
+    }
+    else if(FORMAT == CSR){
+        printf("format CSR\n");
+        //skip to the first non zero value row
+        int row_idx = 1;
+        for(int i = 1; i<=mtx.x;i++){
+            if(mtx.row[i] == 0){
+                ++row_idx;
+            }
+            else{
+                break;
+            }
+
+            printf("skip\n");
+        }
+        for (int i = 0; i < mtx.n; i++)
+        {
+            if(i == mtx.row[row_idx]){
+                ++row_idx;
+            } 
+            printf("[%d,%d] = %d\n",row_idx - 1,mtx.col[i], mtx.val[i]);
+        }
         
+    }
+    else{
+        printf("not a valid format!\n");
     }
 
 }

@@ -1,0 +1,26 @@
+mkdir -p ./obj/
+nvcc -o ./obj/addition addition.cu  
+starting host execution
+
+Kernel Time: 1.810432 ms
+starting host execution
+
+Kernel Time: 1.983488 ms
+starting host execution
+
+Kernel Time: 1.952768 ms
+starting host execution
+
+Kernel Time: 1.922048 ms
+starting host execution
+
+Kernel Time: 2.230272 ms
+starting host execution
+
+Kernel Time: 2.449408 ms
+starting host execution
+
+Kernel Time: 10.874880 ms
+starting host execution
+
+Kernel Time: 90.432510 ms

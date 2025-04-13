@@ -2,7 +2,31 @@
 #include <stdlib.h>
 #include <time.h>
 
+__global__ void add_kernel_naive(int * x1, int * x2, int * res, int n){
+    for(int i = 0; i< n; i++){
+        res[i] = x1[i] + x2[i];
+    }
+}
+
 __global__ void add_kernel(int * x1, int * x2, int * res, int n){
+    
+    int index = blockIdx.x * blockDim.x + threadIdx.x;
+    
+    // if (n % ((blockIdx.x + 1) * blockDim.x) != 0){//means that is the block with more cores than threads
+    //     if (index < (n % blockDim.x))
+    //     {
+    //         res[index] = x1[index] + x2[index];
+    //     }    
+    // }
+    // else{
+    //     res[index] = x1[index] + x2[index];
+
+    // }
+    res[index] = x1[index] + x2[index];
+    
+}
+
+__global__ void add_kernel_jump(int * x1, int * x2, int * res, int n){
     for(int i = 0; i< n; i++){
         res[i] = x1[i] + x2[i];
     }
@@ -27,12 +51,15 @@ int main(int argc, char * args[]){
         return 0;
     }
     int N = atoi(args[1]);
+
     srand(time(NULL));
     int * x1;
     int * x2;
     int * res;
-    int blockNumber = 1;
-    int threadNumber = 256;
+    
+    int blockSize = 256;
+    int blockNumber = (N + blockSize -1) / blockSize;
+    
 
     // Create the memory in the GPU
     cudaMallocManaged(&x1, sizeof(int) * N);
@@ -57,7 +84,7 @@ int main(int argc, char * args[]){
     
     cudaEventRecord(start);
     //code here
-    add_kernel<<<blockNumber,threadNumber>>>(x1,x2,res,N);
+    add_kernel<<<blockNumber,blockSize>>>(x1,x2,res,N);
     // plus_one<<<blockNumber,threadNumber>>>(x1,N);
 
     cudaEventRecord(stop);
