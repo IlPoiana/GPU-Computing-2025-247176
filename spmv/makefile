@@ -13,3 +13,6 @@ clean:
 	rm -r ./obj/*
 comparison:
 	gcc $(LIB) comparison.c -o $(OBJ)comparison $(FLAGS)
+	gcc $(LIB) comparison.c -o $(OBJ)comparison1 $(FLAGS) -O1
+	gcc $(LIB) comparison.c -o $(OBJ)comparison2 $(FLAGS) -O2
+	gcc $(LIB) comparison.c -o $(OBJ)comparison3 $(FLAGS) -O3

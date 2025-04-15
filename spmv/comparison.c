@@ -2,23 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/time.h>
 #include <math.h>
 #include "../lib.h"
 
-/**
- * arr needs to be same size of mtx.y
- */
-int * coo_multiplication(struct int_matrix mtx, int * arr){
-    int * res = (int*)calloc(mtx.n, sizeof(int));
-    int * row = mtx.row;
-    int * col = mtx.col;
-    int * value = mtx.val;
-    int tot = mtx.n;
-    for(int i = 0; i< tot; i++){
-        res[row[i]] = res[row[i]] + value[i] * arr[col[i]]; 
-    }
-    return res;
-}
 
 int main(int argc, char *args[]){
     if (argc < 2 | argc < 3)
@@ -44,24 +31,59 @@ int main(int argc, char *args[]){
     int binary = atoi(args[4]);
     printf("Passed arguments\nx: %d\ny: %d\np: %d\nbinary: %d\n\n",row_n,col_n,p,binary);
    
+    struct timeval temp_1={0,0};
+    struct timeval temp_2={0,0};
 
     struct int_matrix coo = gen_rnd_COO(row_n, col_n,p,binary);
-    PRINT_INT_MTX(coo, COO);
+    // PRINT_INT_MTX(coo, COO);
     struct int_matrix csr = convert_COO_CSR(coo);
-    PRINT_INT_MTX(csr, CSR);
+    // PRINT_INT_MTX(csr, CSR);
     int * arr = (int*)malloc(sizeof(int) * coo.y);
     for(int i = 0; i<coo.y; i++){
         arr[i] = rand() % 5;
     }
-    PRINT_RESULT_ARRAY(arr, "arr", coo.y);
+    // PRINT_RESULT_ARRAY(arr, "arr", coo.y);
 
     printf("Running sparse matrix multiplication between a 1 vector and a integer value matrix\n");
 
-    int *res = (int*)calloc(col_n, sizeof(int));
-    
-    res = coo_multiplication(coo, arr);
+    printf("COO\n");
+    int * res = (int*)calloc(coo.n, sizeof(int));
+    int * row = coo.row;
+    int * col = coo.col;
+    int * value = coo.val;
+    int tot = coo.n;
 
-    PRINT_RESULT_ARRAY(res, "res", row_n);
+    gettimeofday(&temp_1, (struct timezone*)0);
+    for(int i = 0; i< tot; i++){
+        res[row[i]] = res[row[i]] + value[i] * arr[col[i]]; 
+    }
+    gettimeofday(&temp_2, (struct timezone*)0);
+    double time = ((temp_2.tv_sec-temp_1.tv_sec)*1.e6+(temp_2.tv_usec-temp_1.tv_usec));
+    printf("time for COO: %lf\n", time);
+
+    
+    
+    printf("CSR\n");
+    res = (int*)calloc(csr.n, sizeof(int));
+
+    row = csr.row;
+    col = csr.col;
+    value = csr.val;
+    int val_idx = 0;
+    gettimeofday(&temp_1, (struct timezone*)0);
+    for(int row_idx = 1; row_idx <= csr.x; row_idx++){
+        if(row[row_idx] == row[row_idx - 1]){
+            //skip
+        }
+        else{
+            for(val_idx; val_idx < row[row_idx]; val_idx++){
+                res[row_idx - 1] += value[val_idx] * arr[col[val_idx]];
+            }
+        }
+    }
+    gettimeofday(&temp_2, (struct timezone*)0);
+    time = ((temp_2.tv_sec-temp_1.tv_sec)*1.e6+(temp_2.tv_usec-temp_1.tv_usec));
+    printf("time for CSR: %lf\n", time);
 
     free(res);
     return 0;
