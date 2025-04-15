@@ -45,23 +45,19 @@ void PRINT_INT_MTX(struct int_matrix mtx, int FORMAT){
     else if(FORMAT == CSR){
         printf("format CSR\n");
         //skip to the first non zero value row
-        int row_idx = 1;
-        for(int i = 1; i<=mtx.x;i++){
-            if(mtx.row[i] == 0){
-                ++row_idx;
-            }
-            else{
-                break;
-            }
-
-            printf("skip\n");
+        int row_ptr = 1;
+        for(int i = row_ptr; mtx.row[i] == 0; i++){
+            ++row_ptr;
         }
-        for (int i = 0; i < mtx.n; i++)
-        {
-            if(i == mtx.row[row_idx]){
-                ++row_idx;
-            } 
-            printf("[%d,%d] = %d\n",row_idx - 1,mtx.col[i], mtx.val[i]);
+
+        //retrieve the data, n values and columns, r rows
+
+        int j = 0;
+        for(row_ptr; row_ptr <= mtx.x; row_ptr++){
+            for(j; j < mtx.row[row_ptr];j++){
+                printf("[%d,%d] = %d\n", row_ptr - 1, mtx.col[j], mtx.val[j]);
+            }
+            printf("-----\n");
         }
         
     }
@@ -93,6 +89,8 @@ void PRINT_RESULT_ARRAY(int * MAT, char * NAME, int DIM) {
     }                                                         
     printf("\n");                                          
 } 
+
+
 
 struct matrix import_matrix(char * file_path){
     FILE *file = fopen(file_path, "r");
@@ -279,6 +277,27 @@ struct int_matrix import_int_matrix(char * file_path){
     return sm;  
 }
 
+struct int_matrix convert_COO_CSR(struct int_matrix mtx){
+    int * row = (int*)calloc(mtx.x + 1, sizeof(int));
+    int * col = (int*)malloc(sizeof(int) * mtx.n);
+    int * val = (int*)malloc(sizeof(int) * mtx.n);
+    struct int_matrix csr = {mtx.x,mtx.y,mtx.n,row,col,val};
+    for(int j = 0; j< mtx.n; j++){
+        col[j] = mtx.col[j];
+        val[j] = mtx.val[j];
+    }
+
+    int j = 0;
+    for(int i = 1; i<= mtx.x; i++){
+        row[i] = row[i - 1];
+        for(j; i - 1 == mtx.row[j] ;j++)
+            if(mtx.val[j] != 0)
+                ++row[i];
+    }
+    // PRINT_RESULT_ARRAY(row,"conversion row",mtx.x +1);
+    return csr;
+}
+
 struct int_matrix gen_rnd_COO(int x, int y, int p, int binary){
     if(binary<1){
         printf("passed an invalid binary argument\n");
@@ -319,4 +338,112 @@ struct int_matrix gen_rnd_COO(int x, int y, int p, int binary){
 
     struct int_matrix mtx = {x,y,count,frow,fcol,fval};
     return mtx;
+}
+
+struct int_matrix gen_rnd_CSR(int x, int y, int p, int binary){
+
+    if(binary<1){
+        printf("passed an invalid binary argument\n");
+        struct int_matrix err = {0,0,0,0,0,0};
+        return err;
+    }
+
+    int max_v = x * y;
+    int * val = (int*)malloc(sizeof(int) * max_v);
+    int * row = (int*)malloc(sizeof(int) * max_v);
+    row[0] = 0; //initialize the first element
+    int * col = (int*)malloc(sizeof(int) * max_v);
+    
+    int count = 0;
+    int row_count = 1;
+    int v_buff = 0;
+
+
+    for(int i = 0; i < max_v;i++){
+        if(i%y == 0 && i!=0){
+            // printf("change row, row count: %d - count: %d - i: %d\n", row_count, count, i);
+            row[row_count] = count;
+            // printf("row[%d] = %d\n --- \n", row_count, count);
+            ++row_count;
+        }
+        
+        v_buff = rand()%p;
+        if(v_buff == 0){
+            if(binary == 1){
+                val[count] = 1;
+            }
+            else{
+                val[count] = (rand() % binary) + 1; 
+            }
+
+            if(i >= y)
+                col[count] = abs((y - i) % y);
+            else
+                col[count] = i;
+
+            ++count;
+            row[row_count] = count;
+            // printf("gen value: i: %d - row[%d] = %d - col[%d] = %d\n", i,row_count, count,count - 1,col[count - 1]);
+        }
+        
+        if(row[row_count] < row[row_count - 1]){
+            row[row_count] = row[row_count - 1];
+        }
+
+    }
+    int * fval = (int*)malloc(sizeof(int) * count);
+    int * frow = (int*)malloc(sizeof(int) * (row_count + 1));
+    int * fcol = (int*)malloc(sizeof(int) * count);
+    
+    for(int i = 0; i< count; i++){
+        fval[i] = val[i];
+        fcol[i] = col[i];
+    }
+
+    for(int i = 0; i<= row_count; i++){
+        frow[i] = row[i];
+    }
+ 
+
+    struct int_matrix mtx = {x,y,count,frow,fcol,fval};
+
+    return mtx;
+}
+
+
+/**
+ * arr needs to be same size of mtx.y
+ */
+int * coo_multiplication(struct int_matrix mtx, int * arr){
+    int * res = (int*)calloc(mtx.n, sizeof(int));
+    int * row = mtx.row;
+    int * col = mtx.col;
+    int * value = mtx.val;
+    int tot = mtx.n;
+    for(int i = 0; i< tot; i++){
+        res[row[i]] = res[row[i]] + value[i] * arr[col[i]]; 
+    }
+    return res;
+}
+
+/**
+ * arr needs to be same size of mtx.y
+ */
+int * csr_multiplication(struct int_matrix mtx, int * arr){
+    int * res = (int*)calloc(mtx.n, sizeof(int));
+    int * row = mtx.row;
+    int * col = mtx.col;
+    int * value = mtx.val;
+    int val_idx = 0;
+    for(int row_idx = 1; row_idx <= mtx.x; row_idx++){
+        if(row[row_idx] == row[row_idx - 1]){
+            //skip
+        }
+        else{
+            for(val_idx; val_idx < row[row_idx]; val_idx++){
+                res[row_idx - 1] += value[val_idx] * arr[col[val_idx]];
+            }
+        }
+    }
+    return res;
 }
