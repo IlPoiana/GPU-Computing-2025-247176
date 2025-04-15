@@ -9,8 +9,13 @@ CSR:
 	gcc $(LIB) csr_rnd.c -o $(OBJ)csr $(FLAGS)
 dir:
 	mkdir -p $(OBJ)
+clean_all: clean clean_out clean_cache 
 clean: 
 	rm -r ./obj/*
+clean_out:
+	rm -r ./out/*
+clean_cache:
+	rm ./cachegrind.*
 comparison:
 	gcc $(LIB) comparison.c -o $(OBJ)comparison $(FLAGS)
 	gcc $(LIB) comparison.c -o $(OBJ)comparison1 $(FLAGS) -O1

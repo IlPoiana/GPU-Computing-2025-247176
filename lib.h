@@ -90,7 +90,14 @@ void PRINT_RESULT_ARRAY(int * MAT, char * NAME, int DIM) {
     printf("\n");                                          
 } 
 
-
+double avg (double * arr, int nelem){
+    double average = 0;
+    printf("nelem: %d\n", nelem);
+    for(int i = 0; i< nelem; i++){
+        average = average + arr[i] / nelem;
+    }
+    return average;
+}
 
 struct matrix import_matrix(char * file_path){
     FILE *file = fopen(file_path, "r");
