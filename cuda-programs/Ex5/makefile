@@ -1,5 +1,9 @@
-all: addition.cu dir
-	nvcc -o ./obj/addition addition.cu  
+ADD=addition
+
+# all: test.cu dir
+# 	nvcc -o ./obj/test test.cu
+all: $(ADD).cu dir
+	nvcc -o ./obj/$(ADD) $(ADD).cu
 dir: 
 	mkdir -p ./obj/
 	mkdir -p ./out/

@@ -2,42 +2,21 @@
 #include <stdlib.h>
 #include <time.h>
 
-__global__ void add_kernel_naive(int * x1, int * x2, int * res, int n){
-    for(int i = 0; i< n; i++){
-        res[i] = x1[i] + x2[i];
-    }
-}
+#ifndef TYPE
+#define TYPE double
+#endif
 
-__global__ void add_kernel(int * x1, int * x2, int * res, int n){
+//Correct
+__global__ void add_kernel(TYPE * x1, TYPE * x2, TYPE * res, int n){
     
     int index = blockIdx.x * blockDim.x + threadIdx.x;
     
-    // if (n % ((blockIdx.x + 1) * blockDim.x) != 0){//means that is the block with more cores than threads
-    //     if (index < (n % blockDim.x))
-    //     {
-    //         res[index] = x1[index] + x2[index];
-    //     }    
-    // }
-    // else{
-    //     res[index] = x1[index] + x2[index];
-
-    // }
-    res[index] = x1[index] + x2[index];
+    if(index < n)
+        res[index] = x1[index] + x2[index];
     
 }
 
-__global__ void add_kernel_jump(int * x1, int * x2, int * res, int n){
-    for(int i = 0; i< n; i++){
-        res[i] = x1[i] + x2[i];
-    }
-}
-
-__global__ void plus_one(int * x1, int n){
-    for(int i = 0; i< n; i++){
-        x1[i]++;
-    }
-}
-
+//Works only for `int` types
 void print_arr(int * arr, int n){
     for(int i = 0; i < n; i++){
         printf(" %d ", arr[i]);
@@ -53,22 +32,22 @@ int main(int argc, char * args[]){
     int N = atoi(args[1]);
 
     srand(time(NULL));
-    int * x1;
-    int * x2;
-    int * res;
+    TYPE * x1 = (TYPE *)malloc(sizeof(TYPE) * N);
+    TYPE * x2 = (TYPE *)malloc(sizeof(TYPE) * N);
+    TYPE * res = (TYPE *)malloc(sizeof(TYPE) * N);
     
     int blockSize = 256;
     int blockNumber = (N + blockSize -1) / blockSize;
     
 
     // Create the memory in the GPU
-    cudaMallocManaged(&x1, sizeof(int) * N);
-    cudaMallocManaged(&x2, sizeof(int) * N);
-    cudaMallocManaged(&res, sizeof(int) * N);
+    cudaMallocManaged(&x1, sizeof(TYPE) * N);
+    cudaMallocManaged(&x2, sizeof(TYPE) * N);
+    cudaMallocManaged(&res, sizeof(TYPE) * N);
 
     for(int i = 0; i<N; i++){
-        x1[i] = rand() % 100;
-        x2[i] = rand() % 100;
+        x1[i] = rand() % 1 + 1;
+        x2[i] = rand() % 1 + 1;
     }
 
     // printf("x1\n");
@@ -85,18 +64,26 @@ int main(int argc, char * args[]){
     cudaEventRecord(start);
     //code here
     add_kernel<<<blockNumber,blockSize>>>(x1,x2,res,N);
-    // plus_one<<<blockNumber,threadNumber>>>(x1,N);
 
+    
     cudaEventRecord(stop);
     cudaEventSynchronize(stop); //float
     
     float milliseconds = 0;
     
     cudaEventElapsedTime(&milliseconds, start, stop);
-    printf("\nKernel Time: %f ms\n", milliseconds);
     
+
     // printf("res\n");
     // print_arr(res,N);
+
+    if(sizeof(TYPE) == sizeof(int))
+        printf("\niteration %d -- result checking: %d = 2\n", N, res[N - 1]);
+    else if(sizeof(TYPE) == sizeof(float))
+        printf("\niteration %d -- result checking: %f = 2\n", N, res[N - 1]);
+    else if(sizeof(TYPE) == sizeof(double))
+        printf("\niteration %d -- result checking: %2f = 2\n", N, res[N - 1]);
+    printf("\nKernel Time: %f ms\n", milliseconds);
 
     cudaEventDestroy(start);
     cudaEventDestroy(stop);

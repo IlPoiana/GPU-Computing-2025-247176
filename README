@@ -1,3 +1,29 @@
+## Cuda kernel usage
+
+*citing the textbook: Programming Massively Parallel Processors*
+
+*The readers should ask where the other two levels of outer loops go. The answer is that the outer two loop levels are now replaced with the grid of threads. The entire grid forms the equivalent of the two-level loop. **Each thread in the grid corresponds to one of the iterations of the original two-level loop**. The original loop variables i and j are now replaced with threadIdx.x and threadIdx.y. Instead of having the loop increment the values of i and j for use in each loop iteration, the CUDA threading hardware generates all of the threadIdx.x and threadIdx.y values for each thread.*
+
+```
+__global__ void MatMul(...){
+    int tx = threadIdx.x;
+    int ty = threadIdx.y;
+    ...
+    for(k=0;k< Width; ++k){
+
+    }
+}
+
+// this is equivalent to 
+for(i){
+    for(j){
+        for(k=0;k< Width; ++k){
+
+        }
+    }
+}
+```
+
 ## Valgrind usage
 Tipical workflow:
 1. Compile using `-g` flag option
