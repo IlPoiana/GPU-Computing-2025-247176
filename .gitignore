@@ -2,3 +2,4 @@ obj/*
 *.err
 *.out
 obj/
+plot_res.ipynb
