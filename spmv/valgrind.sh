@@ -1,8 +1,8 @@
 #! /usr/bin/bash
 mkdir -p ./out/
 
-x=1
-y=10000000
+x=10000000
+y=2
 p=100000
 binary=1
 
