@@ -46,3 +46,21 @@ When simulating the branch predictor, with --branch-sim=yes, Cachegrind gathers 
 -   Conditional branches executed (`Bc`) and conditional branches mispredicted (`Bcm`).
 
 -   Indirect branches executed (`Bi`) and indirect branches mispredicted (`Bim`).
+
+## CPU part
+- Debate why COO and why CSR
+
+- Evaluate stack vs heap:
+- optimization flags of compiler
+- cache usage vs no cache usage
+    - and what factors influences cache hit and misses
+
+
+0. Parameters fine tuning:
+    1. CPU comparison: how many warm up rounds and how many iterations? Binary vs not binary
+1. how does it scale? **FLOPs** and **BANDWIDTH**
+
+Test implementations:
+-Dense 100% - 90% - 80%
+-Sparse 50% - 25% - 10% - 1%
+-Extremely sparse <1% (0.1-0.01-0.001%) 

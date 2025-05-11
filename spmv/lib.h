@@ -2,9 +2,27 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #define COO 0
 #define CSR 1
+
+void START_CPU_TIMER (struct timeval time1){
+    return gettimeofday(&time1, (struct timezone*)0);  
+}  
+    
+double SET_CPU_TIMER (struct timeval time1) {
+
+    return (time2.tv_sec-time1.tv_sec)*1.e6+(time2.tv_usec-time1.tv_usec);
+}
+
+struct measuraments
+{
+    double * measures;
+    int n
+};
+
+
 
 struct matrix{
     int x;

@@ -20,6 +20,14 @@ int main(int argc, char *args[]){
         printf("tell if the random COO should be binary or not (>1)");
         return 0;
     }
+    if (argc < 6){
+        printf("tell the number of WARM-UP rounds");
+        return 0;
+    }
+    if (argc < 7){
+        printf("tell the number of ITERATION rounds");
+        return 0;
+    }
     //random initializer
     srand(time(NULL));
 
@@ -28,6 +36,8 @@ int main(int argc, char *args[]){
     int max_v = row_n * col_n;
     int p = atoi(args[3]);
     int binary = atoi(args[4]);
+    int warm_up = atoi(args[5]);
+    int iteration = atoi(args[6]);
     printf("Passed arguments\nx: %d\ny: %d\np: %d\nbinary: %d\n\n",row_n,col_n,p,binary);
    
 
@@ -44,19 +54,25 @@ int main(int argc, char *args[]){
     int *row = mtx.row;
     int *col = mtx.col;
     int *value = mtx.val;
-    int *res = (int*)calloc(col_n, sizeof(int));
+    int *res = (int*)calloc(row_n, sizeof(int));
+    int * arr = (int*)malloc(sizeof(int) * mtx.y);
+    for(int i = 0; i<mtx.y; i++){
+        arr[i] = 1; // FIX IT??
+    }
     //not ordered matrix, spMV with a vector of all 1
     //all 1 vector len = col, remember that mtx starts from 1
     
-    int r_idx = 0;
-    for(int i = 0; i< tot; i++){
-        
-        printf("row[%d]: %d\n", i,row[i]);
-
-        res[row[i]] = res[row[i]] + value[i]; 
-
+    for(int i = -warm_up; i< iteration; i++){
+        res = coo_multiplication(mtx,arr)
+        printf("CHECK 1, is the multiplication correct?\n");
+        PRINT_RESULT_ARRAY(res,'res',mtx.y);
+        return 0;
+        if(i <= warm_up ){
+        }
+        else{
+            
+        }
     }
-    PRINT_RESULT_ARRAY(res, "res", row_n);
 
     free(res);
     return 0;

@@ -2,7 +2,7 @@ FLAGS=-g -lm
 OBJ=./obj/
 LIB=../lib.h
 
-all:dir COO CSR comparison
+all:dir COO CSR heap_comparison stack_comparison 
 COO:
 	gcc $(LIB) coo_rnd.c -o $(OBJ)coo $(FLAGS)
 CSR:
@@ -16,8 +16,13 @@ clean_out:
 	rm -r ./out/*
 clean_cache:
 	rm ./cachegrind.*
-comparison:
-	gcc $(LIB) comparison.c -o $(OBJ)comparison $(FLAGS)
-	gcc $(LIB) comparison.c -o $(OBJ)comparison1 $(FLAGS) -O1
-	gcc $(LIB) comparison.c -o $(OBJ)comparison2 $(FLAGS) -O2
-	gcc $(LIB) comparison.c -o $(OBJ)comparison3 $(FLAGS) -O3
+heap_comparison:
+	gcc $(LIB) heap_comparison.c -o $(OBJ)comparison $(FLAGS)
+	gcc $(LIB) heap_comparison.c -o $(OBJ)comparison1 $(FLAGS) -O1
+	gcc $(LIB) heap_comparison.c -o $(OBJ)comparison2 $(FLAGS) -O2
+	gcc $(LIB) heap_comparison.c -o $(OBJ)comparison3 $(FLAGS) -O3
+stack_comparison:
+	gcc $(LIB) stack_comparison.c -o $(OBJ)comparison $(FLAGS)
+	gcc $(LIB) stack_comparison.c -o $(OBJ)comparison1 $(FLAGS) -O1
+	gcc $(LIB) stack_comparison.c -o $(OBJ)comparison2 $(FLAGS) -O2
+	gcc $(LIB) stack_comparison.c -o $(OBJ)comparison3 $(FLAGS) -O3

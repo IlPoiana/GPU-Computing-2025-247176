@@ -9,6 +9,9 @@
 #define WARM_UP 20
 #define N_ITER 100
 
+// Heap variables
+
+
 int main(int argc, char *args[]){
     if (argc < 2 | argc < 3)
     {
@@ -44,7 +47,7 @@ int main(int argc, char *args[]){
     // PRINT_INT_MTX(csr, CSR);
     int * arr = (int*)malloc(sizeof(int) * coo.y);
     for(int i = 0; i<coo.y; i++){
-        arr[i] = rand() % 5;
+        arr[i] = rand() % 5; // FIX IT??
     }
     // PRINT_RESULT_ARRAY(arr, "arr", coo.y);
 
