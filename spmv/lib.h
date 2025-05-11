@@ -2,27 +2,36 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <time.h>
+#include <sys/time.h>
 
 #define COO 0
 #define CSR 1
 
-void START_CPU_TIMER (struct timeval time1){
-    return gettimeofday(&time1, (struct timezone*)0);  
+/**
+ * @brief initialize the timer
+ * 
+ * @param time1 first time variable
+ */
+void START_CPU_TIMER (struct timeval *time1){
+    gettimeofday(time1, (struct timezone*)0); 
 }  
     
-double SET_CPU_TIMER (struct timeval time1) {
-
-    return (time2.tv_sec-time1.tv_sec)*1.e6+(time2.tv_usec-time1.tv_usec);
+/**
+ * @brief compute the elapsed time betwenn time1(initialized) and time2
+ * 
+ * @param time1 initialized timer
+ * @param time2
+ * @return double the elasped time in microseconds
+ */
+double END_CPU_TIMER (struct timeval *time1, struct timeval *time2) {
+    gettimeofday(time2, (struct timezone*)0);
+    double ftime = (time2->tv_sec-time1->tv_sec)*1.e6+(time2->tv_usec-time1->tv_usec);
+    time1->tv_sec = 0;
+    time1->tv_usec = 0;
+    time2->tv_sec = 0;
+    time2->tv_usec = 0;
+    return ftime;
 }
-
-struct measuraments
-{
-    double * measures;
-    int n
-};
-
-
 
 struct matrix{
     int x;
@@ -44,7 +53,6 @@ struct int_matrix {
     int * col;
     int * val;
 };
-
 
 void PRINT_INT_MTX(struct int_matrix mtx, int FORMAT){
     printf("x: %d\ny: %d\nn: %d\n", mtx.x, mtx.y, mtx.n);
@@ -108,13 +116,33 @@ void PRINT_RESULT_ARRAY(int * MAT, char * NAME, int DIM) {
     printf("\n");                                          
 } 
 
+void JSON_FORMAT_ITER(int warm, int iter, double avg, double std){
+    printf("{\"warmup\":%d,\"niter\":%d,\"avg\": %lf,\"std\": %lf}\n",warm,iter,avg,std);
+}
+
+void JSON_FORMAT(int x, int y, int n, double avg) {
+    printf("{\"x\":%d,\"y\":%d,\"nelem\":%d,\"average\": %lf}\n",x,y,n,avg);
+}
+
 double avg (double * arr, int nelem){
     double average = 0;
-    printf("nelem: %d\n", nelem);
+    // printf("nelem: %d\n", nelem);
     for(int i = 0; i< nelem; i++){
         average = average + arr[i] / nelem;
     }
     return average;
+}
+
+double std(const double *data, double avg,int n) {
+    double sum_sq = 0.0;
+    for (int i = 0; i < n; i++) {
+        double d = data[i] - avg;
+        sum_sq += d * d;
+    }
+    
+    return sqrt(
+        sum_sq / n
+    );
 }
 
 struct matrix import_matrix(char * file_path){

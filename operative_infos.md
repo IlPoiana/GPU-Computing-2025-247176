@@ -51,16 +51,21 @@ When simulating the branch predictor, with --branch-sim=yes, Cachegrind gathers 
 - Debate why COO and why CSR
 
 - Evaluate stack vs heap:
-- optimization flags of compiler
+- optimization flags of compiler -> see iterations.json
 - cache usage vs no cache usage
     - and what factors influences cache hit and misses
-
+- (plus) Use non std. implementations: *"(ILP, OpenMP is a plus)"*
 
 0. Parameters fine tuning:
     1. CPU comparison: how many warm up rounds and how many iterations? Binary vs not binary
-1. how does it scale? **FLOPs** and **BANDWIDTH**
+1. how does it scale? **TIME**,**FLOPs** and **BANDWIDTH**
 
 Test implementations:
 -Dense 100% - 90% - 80%
 -Sparse 50% - 25% - 10% - 1%
 -Extremely sparse <1% (0.1-0.01-0.001%) 
+
+## PLOTTING
+1. 3 plots for each implementations: **TIME**,**FLOPs** and **BANDWIDTH** -> 6 plots
+2. Matrix for the iterations and plots
+3. Histograms for comparing different implementations

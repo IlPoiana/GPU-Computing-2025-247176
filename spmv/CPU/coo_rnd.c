@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/time.h>
 #include <time.h>
 #include <math.h>
 #include "../lib.h"
@@ -29,7 +30,8 @@ int main(int argc, char *args[]){
         return 0;
     }
     //random initializer
-    srand(time(NULL));
+    // srand(time(NULL));
+
 
     int row_n = atoi(args[1]);
     int col_n = atoi(args[2]); 
@@ -37,14 +39,14 @@ int main(int argc, char *args[]){
     int p = atoi(args[3]);
     int binary = atoi(args[4]);
     int warm_up = atoi(args[5]);
-    int iteration = atoi(args[6]);
-    printf("Passed arguments\nx: %d\ny: %d\np: %d\nbinary: %d\n\n",row_n,col_n,p,binary);
+    int iterations = atoi(args[6]);
+    // printf("Passed arguments\nx: %d\ny: %d\np: %d\nbinary: %d\n\n",row_n,col_n,p,binary);
    
 
     struct int_matrix mtx = gen_rnd_COO(row_n, col_n,p,binary);
-    PRINT_INT_MTX(mtx, COO);
+    // PRINT_INT_MTX(mtx, COO);
     
-    printf("Running sparse matrix multiplication between a 1 vector and a integer value matrix\n");
+    // printf("Running sparse matrix multiplication between a 1 vector and a integer value matrix\n");
     
     if (mtx.x == 0 && mtx.y == 0){
         printf("matrix not loaded correctly\n");
@@ -56,24 +58,30 @@ int main(int argc, char *args[]){
     int *value = mtx.val;
     int *res = (int*)calloc(row_n, sizeof(int));
     int * arr = (int*)malloc(sizeof(int) * mtx.y);
+    double * measures = (double*)malloc(sizeof(double) * iterations);
     for(int i = 0; i<mtx.y; i++){
         arr[i] = 1; // FIX IT??
     }
     //not ordered matrix, spMV with a vector of all 1
     //all 1 vector len = col, remember that mtx starts from 1
-    
-    for(int i = -warm_up; i< iteration; i++){
-        res = coo_multiplication(mtx,arr)
-        printf("CHECK 1, is the multiplication correct?\n");
-        PRINT_RESULT_ARRAY(res,'res',mtx.y);
-        return 0;
-        if(i <= warm_up ){
+    struct timeval time1 = {0,0};
+    struct timeval time2 = {0,0};
+
+    gettimeofday(&time1, (struct timezone*)0);
+    for(int i = -warm_up; i< iterations; i++){
+        if(i < 0 ){
+            res = coo_multiplication(mtx,arr);
         }
         else{
-            
+            START_CPU_TIMER(&time1);
+            res = coo_multiplication(mtx,arr);
+            measures[i] = END_CPU_TIMER(&time1,&time2);
         }
     }
-
+    double average = avg(measures, iterations);
+    JSON_FORMAT_ITER(warm_up,iterations,average,std(measures,average,iterations));
+    free(arr);
+    free(measures);
     free(res);
     return 0;
 

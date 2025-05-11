@@ -5,6 +5,10 @@ LIB=../lib.h
 all:dir COO CSR heap_comparison stack_comparison 
 COO:
 	gcc $(LIB) coo_rnd.c -o $(OBJ)coo $(FLAGS)
+COO_flags: dir COO
+	gcc $(LIB) coo_rnd.c -o $(OBJ)coo1 $(FLAGS) -O1
+	gcc $(LIB) coo_rnd.c -o $(OBJ)coo2 $(FLAGS) -O2
+	gcc $(LIB) coo_rnd.c -o $(OBJ)coo3 $(FLAGS) -O3
 CSR:
 	gcc $(LIB) csr_rnd.c -o $(OBJ)csr $(FLAGS)
 dir:
