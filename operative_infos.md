@@ -48,6 +48,15 @@ When simulating the branch predictor, with --branch-sim=yes, Cachegrind gathers 
 -   Indirect branches executed (`Bi`) and indirect branches mispredicted (`Bim`).
 
 ## CPU part
+1. Dense SpMV implementation (both binary and real) (done)
+2. COO implementation sorted by row and not by columns Naive Product (done)
+3. More Optimized implementation(0 skip, sequential access and loop unrolling)
+   1. Valgrind on the unrolled and the std one to see the branching factor and the cache behavior. **Cache** doesn't change it's behavior but it requires less instruction (probably the jumps in the loops). The unrolled is better by a slightly amount but subject to more branching due to the more checks, so it suffer more from context switching of the CPU routine
+
+   2. OpenMP see the branching of the threads
+4. Comparison between real and binary/integer numbers in performance(read things)  
+5. comparison with optimization flags
+
 - Debate why COO and why CSR
 
 - Evaluate stack vs heap:
@@ -60,10 +69,22 @@ When simulating the branch predictor, with --branch-sim=yes, Cachegrind gathers 
     1. CPU comparison: how many warm up rounds and how many iterations? Binary vs not binary
 1. how does it scale? **TIME**,**FLOPs** and **BANDWIDTH**
 
-Test implementations:
+## GPU part
+"Side note, nel caso di GPU invece consideri solo le read e write da e per global memory, r/w su registri può ignorarle in quanto ordini di grandezza più veloci di quelle in global."
+
+## Test implementations:
+Matrix
 -Dense 100% - 90% - 80%
 -Sparse 50% - 25% - 10% - 1%
 -Extremely sparse <1% (0.1-0.01-0.001%) 
+Array:
+-Dense 100%
+-Half 50%
+-Sparse 10% 1% or less
+
+### Bandwidth considerations:
+"in generale conti sempre gli accessi indotti dal codice, ignorando le ottimizzazioni black-box fatte dal compilatore."
+
 
 ## PLOTTING
 1. 3 plots for each implementations: **TIME**,**FLOPs** and **BANDWIDTH** -> 6 plots

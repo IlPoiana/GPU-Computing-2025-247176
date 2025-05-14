@@ -1,4 +1,4 @@
-FLAGS=-g -lm
+FLAGS=-g -lm -fopenmp
 OBJ=./obj/
 LIB=../lib.h
 
@@ -9,6 +9,12 @@ COO_flags: dir COO
 	gcc $(LIB) coo_rnd.c -o $(OBJ)coo1 $(FLAGS) -O1
 	gcc $(LIB) coo_rnd.c -o $(OBJ)coo2 $(FLAGS) -O2
 	gcc $(LIB) coo_rnd.c -o $(OBJ)coo3 $(FLAGS) -O3
+COO_1:
+	gcc $(LIB) coo_rnd_1.c -o $(OBJ)coo $(FLAGS)
+COO_1flags: dir COO_1
+	gcc $(LIB) coo_rnd_1.c -o $(OBJ)coo1 $(FLAGS) -O1
+	gcc $(LIB) coo_rnd_1.c -o $(OBJ)coo2 $(FLAGS) -O2
+	gcc $(LIB) coo_rnd_1.c -o $(OBJ)coo3 $(FLAGS) -O3
 CSR:
 	gcc $(LIB) csr_rnd.c -o $(OBJ)csr $(FLAGS)
 dir:

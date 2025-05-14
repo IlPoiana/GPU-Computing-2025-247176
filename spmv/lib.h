@@ -3,10 +3,11 @@
 #include <string.h>
 #include <math.h>
 #include <sys/time.h>
+#include <omp.h>
 
 #define COO 0
 #define CSR 1
-
+#define THREADS_N 7
 /**
  * @brief initialize the timer
  * 
@@ -117,11 +118,11 @@ void PRINT_RESULT_ARRAY(int * MAT, char * NAME, int DIM) {
 } 
 
 void JSON_FORMAT_ITER(int warm, int iter, double avg, double std){
-    printf("{\"warmup\":%d,\"niter\":%d,\"avg\": %lf,\"std\": %lf}\n",warm,iter,avg,std);
+    printf("{\"warmup\":%d,\"niter\":%d,\"avg\": %lf,\"std\": %lf},\n",warm,iter,avg,std);
 }
 
 void JSON_FORMAT(int x, int y, int n, double avg) {
-    printf("{\"x\":%d,\"y\":%d,\"nelem\":%d,\"average\": %lf}\n",x,y,n,avg);
+    printf("{\"x\":%d,\"y\":%d,\"nelem\":%d,\"average\": %lf},\n",x,y,n,avg);
 }
 
 double avg (double * arr, int nelem){
@@ -351,6 +352,15 @@ struct int_matrix convert_COO_CSR(struct int_matrix mtx){
     return csr;
 }
 
+/**
+ * @brief Ordered by row
+ * 
+ * @param x 
+ * @param y 
+ * @param p 
+ * @param binary 
+ * @return struct int_matrix 
+ */
 struct int_matrix gen_rnd_COO(int x, int y, int p, int binary){
     if(binary<1){
         printf("passed an invalid binary argument\n");
@@ -466,18 +476,128 @@ struct int_matrix gen_rnd_CSR(int x, int y, int p, int binary){
 
 /**
  * arr needs to be same size of mtx.y
+ * ## BANDWIDTH
+ * - Br: 5 (+row & col) OR 6 (2 times)
+ * - Bw: 1 write (int 4 bytes) * n
+ *  Br + Bw => 4*3*n + 4*n => 4*n(6 + 1)  
  */
-int * coo_multiplication(struct int_matrix mtx, int * arr){
-    int * res = (int*)calloc(mtx.n, sizeof(int));
-    int * row = mtx.row;
-    int * col = mtx.col;
-    int * value = mtx.val;
-    int tot = mtx.n;
-    for(int i = 0; i< tot; i++){
+int * coo_multiplication(int * row, int * col, int * value, int * res, int * arr, int n){
+    for(int i = 0; i< n; i++){
         res[row[i]] = res[row[i]] + value[i] * arr[col[i]]; 
     }
     return res;
 }
+
+/**
+ * @brief COO spmv multiplication with branching for 0 elements
+ * 
+ * @param row 
+ * @param col 
+ * @param value 
+ * @param res 
+ * @param arr 
+ * @param n 
+ * @return int* 
+ */
+int * coo_multiplication_1_OMP(int * row, int * col, int * value, int * res, int * arr, int n){
+    omp_set_num_threads(THREADS_N);
+    #pragma omp parallel for
+    for(int i = 0; i< n; i++){
+        if(arr[col[i]] == 0)
+            continue;
+        #pragma omp atomic
+        res[row[i]] += value[i] * arr[col[i]]; 
+    }
+    return res;
+}
+
+int * coo_multiplication_1(int * row, int * col, int * value, int * res, int * arr, int n){
+    for(int i = 0; i< n; i++){
+        if(arr[col[i]] == 0)
+            continue;
+        res[row[i]] += value[i] * arr[col[i]]; 
+    }
+    return res;
+}
+
+/**
+ * @brief unrolled loop of 2 steps for coo_multiplication
+ * 
+ * @param row 
+ * @param col 
+ * @param value 
+ * @param res 
+ * @param arr 
+ * @param n 
+ * @return int* 
+ */
+int * coo_multiplication_binary_unrolled(int * row, int * col, int * value, int * res, int * arr, int n){
+    if((n & 1) == 0)
+        for(int i = 0; i< n-1; i+=2){
+            if(arr[col[i+ 1]] != 0)
+                res[row[i + 1]] += value[i + 1] * arr[col[i+ 1]];
+            if(arr[col[i]] == 0)
+                continue;
+
+            res[row[i]] += value[i] * arr[col[i]];
+        }
+    else{
+        for(int i = 0; i< n-2; i+=2){
+            if(arr[col[i+ 1]] != 0)
+                res[row[i + 1]] += value[i + 1] * arr[col[i+ 1]];
+            if(arr[col[i]] == 0)
+                continue;
+
+            res[row[i]] += value[i] * arr[col[i]];
+        }
+        res[row[n-1]] += value[n - 1] * arr[col[n - 1]];
+    }
+        
+    return res;
+}
+
+#include <omp.h>
+
+int *coo_multiplication_b_u_OMP(int *row, int *col, int *value, int *res, int *arr, int n) {
+    omp_set_num_threads(THREADS_N);
+    if ((n & 1) == 0) {
+        #pragma omp parallel for
+        for (int i = 0; i < n - 1; i += 2) {
+            // First iteration
+            if (arr[col[i + 1]] != 0) {
+                #pragma omp atomic
+                res[row[i + 1]] += value[i + 1] * arr[col[i + 1]];
+            }
+            if (arr[col[i]] != 0) {
+                #pragma omp atomic
+                res[row[i]] += value[i] * arr[col[i]];
+            }
+        }
+    } else {
+        #pragma omp parallel for
+        for (int i = 0; i < n - 2; i += 2) {
+            // First iteration
+            if (arr[col[i + 1]] != 0) {
+                #pragma omp atomic
+                res[row[i + 1]] +=  value[i + 1] * arr[col[i + 1]];
+            }
+            if (arr[col[i]] != 0) {
+                #pragma omp atomic
+                res[row[i]] += value[i] * arr[col[i]];
+            }
+        }
+        // Last iteration (single element)
+        if (arr[col[n - 1]] != 0) {
+            #pragma omp atomic
+            res[row[n - 1]] += value[n - 1] * arr[col[n - 1]];
+        }
+    }
+
+    return res;
+}
+
+
+
 
 /**
  * arr needs to be same size of mtx.y
@@ -499,4 +619,10 @@ int * csr_multiplication(struct int_matrix mtx, int * arr){
         }
     }
     return res;
+}
+
+void reset_array(int * arr, int dim){
+    for(int i=0; i<dim;i++){
+        arr[i] = 0;
+    }
 }

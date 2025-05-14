@@ -3,3 +3,5 @@ obj/*
 *.out
 obj/
 plot_res.ipynb
+json/*
+json/
