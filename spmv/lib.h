@@ -34,14 +34,6 @@ double END_CPU_TIMER (struct timeval *time1, struct timeval *time2) {
     return ftime;
 }
 
-struct matrix{
-    int x;
-    int y;
-    int n;
-    int * row;
-    int * col;
-};
-
 /**
  * @brief (x,y,n,row,col,val arrays)
  * 
@@ -54,6 +46,21 @@ struct int_matrix {
     int * col;
     int * val;
 };
+
+/**
+ * @brief (x,y,n,row,col,val)
+ * 
+ */
+struct long_matrix
+{
+    long x;
+    long y;
+    long n;
+    long * row;
+    long * col;
+    long * val;
+};
+
 
 void PRINT_INT_MTX(struct int_matrix mtx, int FORMAT){
     printf("x: %d\ny: %d\nn: %d\n", mtx.x, mtx.y, mtx.n);
@@ -94,6 +101,45 @@ void PRINT_INT_MTX(struct int_matrix mtx, int FORMAT){
 
 }
 
+void PRINT_LONG_MTX(struct long_matrix mtx, int FORMAT){
+    printf("x: %ld\ny: %ld\nn: %ld\n", mtx.x, mtx.y, mtx.n);
+    if(FORMAT == COO){
+        printf("format COO\n");
+        long val = 0;
+        for(long i = 0; i< mtx.n; i++){
+            if(mtx.row[i] > val){
+                val = mtx.row[i];
+                printf("-----\n");
+            }
+            printf("[%ld,%ld] = %ld\n",mtx.row[i],mtx.col[i], mtx.val[i]);
+            
+        }
+    }
+    else if(FORMAT == CSR){
+        printf("format CSR\n");
+        //skip to the first non zero value row
+        long row_ptr = 1;
+        for(long i = row_ptr; mtx.row[i] == 0; i++){
+            ++row_ptr;
+        }
+
+        //retrieve the data, n values and columns, r rows
+
+        long j = 0;
+        for(row_ptr; row_ptr <= mtx.x; row_ptr++){
+            for(j; j < mtx.row[row_ptr];j++){
+                printf("[%ld,%ld] = %ld\n", row_ptr - 1, mtx.col[j], mtx.val[j]);
+            }
+            printf("-----\n");
+        }
+        
+    }
+    else{
+        printf("not a valid format!\n");
+    }
+
+}
+
 /**
  * @brief Supposing it's a square matrix
  * 
@@ -121,22 +167,22 @@ void JSON_FORMAT_ITER(int warm, int iter, double avg, double std){
     printf("{\"warmup\":%d,\"niter\":%d,\"avg\": %lf,\"std\": %lf},\n",warm,iter,avg,std);
 }
 
-void JSON_FORMAT(int x, int y, int n, double avg) {
-    printf("{\"x\":%d,\"y\":%d,\"nelem\":%d,\"average\": %lf},\n",x,y,n,avg);
+void JSON_FORMAT(long x, long y, long n, double avg) {
+    printf("{\"x\":%ld,\"y\":%ld,\"nelem\":%ld,\"average\": %lf},\n",x,y,n,avg);
 }
 
-double avg (double * arr, int nelem){
+double avg (double * arr, long nelem){
     double average = 0;
     // printf("nelem: %d\n", nelem);
-    for(int i = 0; i< nelem; i++){
+    for(long i = 0; i< nelem; i++){
         average = average + arr[i] / nelem;
     }
     return average;
 }
 
-double std(const double *data, double avg,int n) {
+double std(double *data, double avg,long n) {
     double sum_sq = 0.0;
-    for (int i = 0; i < n; i++) {
+    for (long i = 0; i < n; i++) {
         double d = data[i] - avg;
         sum_sq += d * d;
     }
@@ -146,24 +192,24 @@ double std(const double *data, double avg,int n) {
     );
 }
 
-struct matrix import_matrix(char * file_path){
+struct long_matrix import_binary_long_matrix(char * file_path){
     FILE *file = fopen(file_path, "r");
 
     // Check if the file was opened successfully
     if (file == NULL) {
         perror("Error opening file");
-        struct matrix err = {0,0,0,0,0};
+        struct long_matrix err = {0,0,0,0,0};
         return err;
     }
 
     char myString[128] = "";
     int init = 1; //flag for initialize the number of elements
     
-    int x; int y; int n;
+    long x; long y; long n;
     
-    int *row; int *col;
+    long *row; long *col;
 
-    int index = 0;
+    long index = 0;
     // Read the content and print it
     while(fgets(myString, 100, file)) {
         
@@ -171,8 +217,8 @@ struct matrix import_matrix(char * file_path){
         else if (init == 1){
             char dimx[16] = ""; char dimy[16] = "";char nelem[16] = "";
             int count = 3;
-            for(int i = 0; (int)myString[i] != '\n'; i++){
-                if((int)myString[i] != ' '){
+            for(long i = 0; (long)myString[i] != '\n'; i++){
+                if((long)myString[i] != ' '){
                     char temp[2] = {myString[i],'\0'};
                     switch (count)
                     {
@@ -196,16 +242,16 @@ struct matrix import_matrix(char * file_path){
                  
             }
                 init = 0;
-                x = atoi(dimx);y = atoi(dimy);n = atoi(nelem);
+                x = atol(dimx);y = atol(dimy);n = atol(nelem);
                 fflush(stdout);
-                row = (int*)malloc(sizeof(int) * n);
-                col = (int*)malloc(sizeof(int) * n);
+                row = (long*)malloc(sizeof(long) * n);
+                col = (long*)malloc(sizeof(long) * n);
         }
         else{
             int count = 2;
             char xelem[16] = "";char yelem[16] = "";char c;  
-            for(int i = 0; (int)myString[i] != '\n'; i++){
-                if((int)myString[i] != ' '){
+            for(long i = 0; (long)myString[i] != '\n'; i++){
+                if((long)myString[i] != ' '){
                     char temp[2] = {myString[i],'\0'};
                     switch (count)
                     {
@@ -224,7 +270,7 @@ struct matrix import_matrix(char * file_path){
                     count = count - 1;
                 }
             }
-            row[index] = atoi(xelem);col[index] = atoi(yelem);
+            row[index] = atol(xelem);col[index] = atol(yelem);
             index = index + 1;
         }
     }
@@ -232,7 +278,100 @@ struct matrix import_matrix(char * file_path){
     // Close the file after finishing
     fclose(file);  
     //switch col and row
-    struct matrix sm = {x,y,n,col, row};
+    struct long_matrix sm = {x,y,n,col, row};
+    return sm;  
+}
+
+struct long_matrix import_integer_long_matrix(char * file_path){
+    FILE *file = fopen(file_path, "r");
+
+    // Check if the file was opened successfully
+    if (file == NULL) {
+        perror("Error opening file");
+        struct long_matrix err = {0,0,0,0,0,0};
+        return err;
+    }
+
+    char myString[128] = "";
+    int init = 1; //flag for initialize the number of elements
+    
+    long x; long y; long n;
+    
+    long *row; long *col; long *val;
+
+    long index = 0;
+    // Read the content and print it
+    while(fgets(myString, 100, file)) {
+        
+        if(myString[0] == (char)37){}
+        else if (init == 1){
+            char dimx[16] = ""; char dimy[16] = "";char nelem[16] = "";
+            int count = 3;
+            for(long i = 0; (long)myString[i] != '\n'; i++){
+                if((long)myString[i] != ' '){
+                    char temp[2] = {myString[i],'\0'};
+                    switch (count)
+                    {
+                    case 3:
+                        strcat(dimx, temp);
+                        break;
+                    case 2:
+                        strcat(dimy, temp); 
+                        break;
+                    case 1:
+                        strcat(nelem, temp);
+                        break;
+                    default:
+                        printf("why are you here!\n");
+                        break;
+                    }
+                }
+                else{
+                    count = count - 1;
+                }
+                 
+            }
+                init = 0;
+                x = atol(dimx);y = atol(dimy);n = atol(nelem);
+                fflush(stdout);
+                row = (long*)malloc(sizeof(long) * n);
+                col = (long*)malloc(sizeof(long) * n);
+                val = (long*)malloc(sizeof(long) * n);
+        }
+        else{
+            int count = 3;
+            char xelem[16] = "";char yelem[16] = "";char value[16] = "";char c;  
+            for(long i = 0; (long)myString[i] != '\n'; i++){
+                if((long)myString[i] != ' '){
+                    char temp[2] = {myString[i],'\0'};
+                    switch (count)
+                    {
+                    case 3:
+                        strcat(xelem, temp);
+                        break;
+                    case 2:
+                        strcat(yelem, temp);
+                        break;
+                    case 1:
+                        strcat(value,temp);
+                        break;
+                    default:
+                        printf("why are you here!\n");
+                        break;
+                    }
+                }
+                else{
+                    count = count - 1;
+                }
+            }
+            row[index] = atol(xelem);col[index] = atol(yelem);val[index] = atol(value);
+            index = index + 1;
+        }
+    }
+
+    // Close the file after finishing
+    fclose(file);  
+    struct long_matrix sm = {x,y,n,col,row, val};
     return sm;  
 }
 
@@ -361,22 +500,22 @@ struct int_matrix convert_COO_CSR(struct int_matrix mtx){
  * @param binary 
  * @return struct int_matrix 
  */
-struct int_matrix gen_rnd_COO(int x, int y, int p, int binary){
+struct long_matrix gen_rnd_COO(long x, long y, int p, int binary){
     if(binary<1){
         printf("passed an invalid binary argument\n");
-        struct int_matrix err = {0,0,0,0,0,0};
+        struct long_matrix err = {0,0,0,0,0,0};
         return err;
     }
 
-    int max_v = x * y;
-    int * val = (int*)malloc(sizeof(int) * max_v);
-    int * row = (int*)malloc(sizeof(int) * max_v);
-    int * col = (int*)malloc(sizeof(int) * max_v);
+    long max_v = x * y;
+    long * val = (long*)malloc(sizeof(long) * max_v);
+    long * row = (long*)malloc(sizeof(long) * max_v);
+    long * col = (long*)malloc(sizeof(long) * max_v);
     
-    int count = 0;
+    long count = 0;
     int v_buff = 0;
 
-    for(int i = 0; i < max_v;i++){
+    for(long i = 0; i < max_v;i++){
         v_buff = rand()%p;
         if(v_buff == 0){
             if(binary == 1){
@@ -390,16 +529,16 @@ struct int_matrix gen_rnd_COO(int x, int y, int p, int binary){
             count = count + 1;
         }    
     }
-    int * fval = (int*)malloc(sizeof(int) * count);
-    int * frow = (int*)malloc(sizeof(int) * count);
-    int * fcol = (int*)malloc(sizeof(int) * count);
-    for( int i = 0; i< count; i++){
+    long * fval = (long*)malloc(sizeof(long) * count);
+    long * frow = (long*)malloc(sizeof(long) * count);
+    long * fcol = (long*)malloc(sizeof(long) * count);
+    for( long i = 0; i< count; i++){
         fval[i] = val[i];
         frow[i] = row[i];
         fcol[i] = col[i];
     }
 
-    struct int_matrix mtx = {x,y,count,frow,fcol,fval};
+    struct long_matrix mtx = {x,y,count,frow,fcol,fval};
     return mtx;
 }
 
@@ -499,10 +638,10 @@ int * coo_multiplication(int * row, int * col, int * value, int * res, int * arr
  * @param n 
  * @return int* 
  */
-int * coo_multiplication_1_OMP(int * row, int * col, int * value, int * res, int * arr, int n){
+long * coo_multiplication_1_OMP(long * row, long * col, long * value, long * res, long * arr, long n){
     omp_set_num_threads(THREADS_N);
     #pragma omp parallel for
-    for(int i = 0; i< n; i++){
+    for(long i = 0; i< n; i++){
         if(arr[col[i]] == 0)
             continue;
         #pragma omp atomic
@@ -511,8 +650,8 @@ int * coo_multiplication_1_OMP(int * row, int * col, int * value, int * res, int
     return res;
 }
 
-int * coo_multiplication_1(int * row, int * col, int * value, int * res, int * arr, int n){
-    for(int i = 0; i< n; i++){
+long * coo_multiplication_1(long * row, long * col, long * value, long * res, long * arr, long n){
+    for(long i = 0; i< n; i++){
         if(arr[col[i]] == 0)
             continue;
         res[row[i]] += value[i] * arr[col[i]]; 
@@ -531,9 +670,9 @@ int * coo_multiplication_1(int * row, int * col, int * value, int * res, int * a
  * @param n 
  * @return int* 
  */
-int * coo_multiplication_binary_unrolled(int * row, int * col, int * value, int * res, int * arr, int n){
+long * coo_multiplication_binary_unrolled(long * row, long * col, long * value, long * res, long * arr, long n){
     if((n & 1) == 0)
-        for(int i = 0; i< n-1; i+=2){
+        for(long i = 0; i< n-1; i+=2){
             if(arr[col[i+ 1]] != 0)
                 res[row[i + 1]] += value[i + 1] * arr[col[i+ 1]];
             if(arr[col[i]] == 0)
@@ -542,7 +681,7 @@ int * coo_multiplication_binary_unrolled(int * row, int * col, int * value, int 
             res[row[i]] += value[i] * arr[col[i]];
         }
     else{
-        for(int i = 0; i< n-2; i+=2){
+        for(long i = 0; i< n-2; i+=2){
             if(arr[col[i+ 1]] != 0)
                 res[row[i + 1]] += value[i + 1] * arr[col[i+ 1]];
             if(arr[col[i]] == 0)
@@ -558,11 +697,11 @@ int * coo_multiplication_binary_unrolled(int * row, int * col, int * value, int 
 
 #include <omp.h>
 
-int *coo_multiplication_b_u_OMP(int *row, int *col, int *value, int *res, int *arr, int n) {
+long *coo_multiplication_b_u_OMP(long *row, long *col, long *value, long *res, long *arr, long n) {
     omp_set_num_threads(THREADS_N);
     if ((n & 1) == 0) {
         #pragma omp parallel for
-        for (int i = 0; i < n - 1; i += 2) {
+        for (long i = 0; i < n - 1; i += 2) {
             // First iteration
             if (arr[col[i + 1]] != 0) {
                 #pragma omp atomic
@@ -575,7 +714,7 @@ int *coo_multiplication_b_u_OMP(int *row, int *col, int *value, int *res, int *a
         }
     } else {
         #pragma omp parallel for
-        for (int i = 0; i < n - 2; i += 2) {
+        for (long i = 0; i < n - 2; i += 2) {
             // First iteration
             if (arr[col[i + 1]] != 0) {
                 #pragma omp atomic
@@ -602,13 +741,13 @@ int *coo_multiplication_b_u_OMP(int *row, int *col, int *value, int *res, int *a
 /**
  * arr needs to be same size of mtx.y
  */
-int * csr_multiplication(struct int_matrix mtx, int * arr){
-    int * res = (int*)calloc(mtx.n, sizeof(int));
-    int * row = mtx.row;
-    int * col = mtx.col;
-    int * value = mtx.val;
-    int val_idx = 0;
-    for(int row_idx = 1; row_idx <= mtx.x; row_idx++){
+long * csr_multiplication(struct long_matrix mtx, long * arr){
+    long * res = (long*)calloc(mtx.n, sizeof(long));
+    long * row = mtx.row;
+    long * col = mtx.col;
+    long * value = mtx.val;
+    long val_idx = 0;
+    for(long row_idx = 1; row_idx <= mtx.x; row_idx++){
         if(row[row_idx] == row[row_idx - 1]){
             //skip
         }
@@ -621,8 +760,8 @@ int * csr_multiplication(struct int_matrix mtx, int * arr){
     return res;
 }
 
-void reset_array(int * arr, int dim){
-    for(int i=0; i<dim;i++){
+void reset_array(long * arr, long dim){
+    for(long i=0; i<dim;i++){
         arr[i] = 0;
     }
 }

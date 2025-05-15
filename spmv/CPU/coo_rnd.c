@@ -37,9 +37,9 @@ int main(int argc, char *args[]){
     // srand(time(NULL));
 
 
-    int row_n = atoi(args[1]);
-    int col_n = atoi(args[2]); 
-    int max_v = row_n * col_n;
+    long row_n = atoi(args[1]);
+    long col_n = atoi(args[2]); 
+    long max_v = row_n * col_n;
     int p = atoi(args[3]);
     int binary = atoi(args[4]);
     int warm_up = atoi(args[5]);
@@ -47,24 +47,24 @@ int main(int argc, char *args[]){
     int d = atoi(args[7]);
     // printf("Passed arguments\nx: %d\ny: %d\np: %d\nbinary: %d\n\n",row_n,col_n,p,binary);
    
-    
-    struct int_matrix mtx = gen_rnd_COO(row_n, col_n,p,binary);
+    struct long_matrix mtx = gen_rnd_COO(row_n, col_n,p,binary);
     // PRINT_INT_MTX(mtx, COO);
+    // PRINT_LONG_MTX(mtx,COO);
     // printf("Running sparse matrix multiplication between a 1 vector and a integer value matrix\n");
     if (mtx.x == 0 && mtx.y == 0){
         printf("matrix not loaded correctly\n");
         return 0;
     }
-    int tot = mtx.n;
-    int *row = mtx.row;
-    int *col = mtx.col;
-    int *value = mtx.val;
-    int *res = (int*)calloc(row_n, sizeof(int));
-    int * arr = (int*)malloc(sizeof(int) * mtx.y);
+    long tot = mtx.n;
+    long *row = mtx.row;
+    long *col = mtx.col;
+    long *value = mtx.val;
+    long *res = (long*)calloc(row_n, sizeof(long));
+    long * arr = (long*)malloc(sizeof(long) * mtx.y);
     double * measures = (double*)malloc(sizeof(double) * iterations);
     
-    int arr_sparsity = 0;
-    for(int i = 0; i<mtx.y; i++){
+    long arr_sparsity = 0;
+    for(long i = 0; i<mtx.y; i++){
         if(d == 1)
             arr[i] = 1;
         else{
@@ -74,7 +74,7 @@ int main(int argc, char *args[]){
             }
         }
     }
-    printf("non 0 elem: %d - arr sparsity: %d\n", mtx.n, arr_sparsity);
+    printf("non 0 elem: %ld - arr sparsity: %ld\n", mtx.n, arr_sparsity);
     //not ordered matrix, spMV with a vector of all 1
     //all 1 vector len = col, remember that mtx starts from 1
     struct timeval time1 = {0,0};

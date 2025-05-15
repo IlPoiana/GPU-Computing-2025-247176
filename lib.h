@@ -3,6 +3,12 @@
 #include <string.h>
 #include <math.h>
 
+/**
+ * @brief DEPRECATED LIB
+ * 
+ */
+
+
 #define COO 0
 #define CSR 1
 

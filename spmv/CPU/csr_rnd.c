@@ -5,6 +5,11 @@
 #include <math.h>
 #include "../lib.h"
 
+
+//DEPRECATED (int -> long)
+
+
+
 int main(int argc, char *args[]){
     if (argc < 2 | argc < 3)
     {
