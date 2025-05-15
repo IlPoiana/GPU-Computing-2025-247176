@@ -6,3 +6,4 @@ plot_res.ipynb
 json/*
 json/
 ./cachegrind.*
+*.json
