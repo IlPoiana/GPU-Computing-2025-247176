@@ -75,6 +75,9 @@ When simulating the branch predictor, with --branch-sim=yes, Cachegrind gathers 
 ## 2 - GPU part
 "Side note, nel caso di GPU invece consideri solo le read e write da e per global memory, r/w su registri può ignorarle in quanto ordini di grandezza più veloci di quelle in global."
 
+1. One Thread for each row (not coalesced access but no race conditions)
+2. 
+
 ## Test implementations:
 Matrix
 -Dense 100%
