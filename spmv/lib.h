@@ -480,7 +480,7 @@ struct int_matrix gen_rnd_CSR(int x, int y, int p, int binary){
  * @param row_ptr an array where is indicated the index of the next row
  * @return void* 
  */
-void COO_multiplication_row_OMP(int *row, int *col, int *value, int *res, int *arr, int n, int x)
+void coo_multiplication_row_OMP(int *row, int *col, int *value, int *res, int *arr, int n, int x)
 {
     int T;
     #pragma omp parallel
