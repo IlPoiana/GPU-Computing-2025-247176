@@ -93,6 +93,7 @@ int main(int argc, char *args[]){
             reset_array(res, row_n);
     }
     double average = avg(measures, iterations);
+    printf("1\n");
     JSON_FORMAT_ITER(warm_up,iterations,average,std(measures,average,iterations));
     // PRINT_RESULT_ARRAY(res,"std",row_n);
 
@@ -115,7 +116,54 @@ int main(int argc, char *args[]){
     //     printf("%lf,",measures[i]);
     // }
     // printf("]\n");
+    printf("1_OMP\n");
     JSON_FORMAT_ITER(warm_up,iterations,average,std(measures,average,iterations));
+    
+
+    for(int i = -warm_up; i< iterations; i++){
+        if(i < 0 ){
+            res = coo_multiplication(row,col,value,res,arr, tot);
+        }
+        else{
+            START_CPU_TIMER(&time1);
+            res = coo_multiplication(row,col,value,res,arr, tot);
+            measures[i] = END_CPU_TIMER(&time1,&time2);
+        }
+        if(i != iterations - 1)
+            reset_array(res, row_n);
+    }
+    average = avg(measures, iterations);
+    // printf("OpenMP\n");
+    // printf("[");
+    // for(int i = 0; i < iterations; i++){
+    //     printf("%lf,",measures[i]);
+    // }
+    // printf("]\n");
+    printf("std.\n");
+    JSON_FORMAT_ITER(warm_up,iterations,average,std(measures,average,iterations));
+    
+    for(int i = -warm_up; i< iterations; i++){
+        if(i < 0 ){
+            res = coo_multiplication_OMP(row,col,value,res,arr, tot);
+        }
+        else{
+            START_CPU_TIMER(&time1);
+            res = coo_multiplication_OMP(row,col,value,res,arr, tot);
+            measures[i] = END_CPU_TIMER(&time1,&time2);
+        }
+        if(i != iterations - 1)
+            reset_array(res, row_n);
+    }
+    average = avg(measures, iterations);
+    // printf("OpenMP\n");
+    // printf("[");
+    // for(int i = 0; i < iterations; i++){
+    //     printf("%lf,",measures[i]);
+    // }
+    // printf("]\n");
+    printf("std. OMP\n");
+    JSON_FORMAT_ITER(warm_up,iterations,average,std(measures,average,iterations));
+
     // PRINT_RESULT_ARRAY(res,"MP",row_n);
 
     for(int i = -warm_up; i< iterations; i++){
@@ -156,6 +204,21 @@ int main(int argc, char *args[]){
     // printf("]\n");
     JSON_FORMAT_ITER(warm_up,iterations,average,std(measures,average,iterations));
     // PRINT_RESULT_ARRAY(res,"UnrolledMP",row_n);
+    
+
+    for(int i = -warm_up; i< iterations; i++){
+        if(i < 0 ){
+            COO_multiplication_row_OMP(row,col,value,res,arr, mtx.n, mtx.x);
+        }
+        else{
+            START_CPU_TIMER(&time1);
+            COO_multiplication_row_OMP(row,col,value,res,arr, mtx.n,mtx.x);
+            measures[i] = END_CPU_TIMER(&time1,&time2);
+        }
+    }
+    average = avg(measures, iterations);
+    printf("row OMP\n");
+    JSON_FORMAT_ITER(warm_up,iterations,average,std(measures,average,iterations));
     
     
     printf("---\n");

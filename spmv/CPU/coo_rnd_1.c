@@ -47,17 +47,15 @@ int main(int argc, char *args[]){
     int d = atoi(args[7]);
     // printf("Passed arguments\nx: %d\ny: %d\np: %d\nbinary: %d\n\n",row_n,col_n,p,binary);
    
-
+    
     struct int_matrix mtx = gen_rnd_COO(row_n, col_n,p,binary);
     // PRINT_INT_MTX(mtx, COO);
-    
     // printf("Running sparse matrix multiplication between a 1 vector and a integer value matrix\n");
-    
     if (mtx.x == 0 && mtx.y == 0){
         printf("matrix not loaded correctly\n");
         return 0;
     }
-    int tot = mtx.n;
+    int n = mtx.n;
     int *row = mtx.row;
     int *col = mtx.col;
     int *value = mtx.val;
@@ -65,17 +63,17 @@ int main(int argc, char *args[]){
     int * arr = (int*)malloc(sizeof(int) * mtx.y);
     double * measures = (double*)malloc(sizeof(double) * iterations);
     
-    int nonzero = 0;
+    int arr_sparsity = 0;
     for(int i = 0; i<mtx.y; i++){
         if(d == 1)
             arr[i] = 1;
         else{
             arr[i] = rand()%d == 0 ? binary : 0;
+            if(arr[i] == 0){
+                arr_sparsity+=1;
+            }
         }
-        // arr[i] = rand() % 10 == 0 ? 1 : 0;
-        // if(arr[i] != 0) ++nonzero;
     }
-    printf("%d",nonzero);
     //not ordered matrix, spMV with a vector of all 1
     //all 1 vector len = col, remember that mtx starts from 1
     struct timeval time1 = {0,0};
@@ -83,17 +81,18 @@ int main(int argc, char *args[]){
 
     for(int i = -warm_up; i< iterations; i++){
         if(i < 0 ){
-            res = coo_multiplication_1(row,col,value,res,arr, tot);
+            COO_multiplication_row_OMP(row,col,value,res,arr, n, mtx.x);
         }
         else{
             START_CPU_TIMER(&time1);
-            res = coo_multiplication_1(row,col,value,res,arr, tot);
+            COO_multiplication_row_OMP(row,col,value,res,arr, n,mtx.x);
             measures[i] = END_CPU_TIMER(&time1,&time2);
         }
     }
     double average = avg(measures, iterations);
     printf("non 0 elem: %d\n", mtx.n);
     JSON_FORMAT_ITER(warm_up,iterations,average,std(measures,average,iterations));
+    // PRINT_RESULT_ARRAY(res,"res", mtx.x);
     free(arr);
     free(measures);
     free(res);
