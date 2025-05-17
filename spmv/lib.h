@@ -7,7 +7,7 @@
 
 #define COO 0
 #define CSR 1
-#define THREADS_N 6
+#define THREADS_N 16
 /**
  * @brief initialize the timer
  * 
