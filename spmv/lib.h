@@ -7,7 +7,7 @@
 
 #define COO 0
 #define CSR 1
-#define THREADS_N 4
+#define THREADS_N 6
 /**
  * @brief initialize the timer
  * 
@@ -475,15 +475,57 @@ struct int_matrix gen_rnd_CSR(int x, int y, int p, int binary){
 
 
 /**
- * arr needs to be same size of mtx.y
- * ## BANDWIDTH
- * - Br: 5 (+row & col) OR 6 (2 times)
- * - Bw: 1 write (int 4 bytes) * n
- *  Br + Bw => 4*3*n + 4*n => 4*n(6 + 1)  
+ * @brief Give a divisible number of rows, you precompute the boundaries, do a for loop over them and then do the remaining iterations
+ * 
+ * @param row_ptr an array where is indicated the index of the next row
+ * @return void* 
  */
+void COO_multiplication_row_OMP(int *row, int *col, int *value, int *res, int *arr, int n, int x)
+{
+    int T;
+    #pragma omp parallel
+    {
+        int tid = omp_get_thread_num();
+        #pragma omp single
+        T = THREADS_N; // get total number of threads
+
+        int boundary = (x + T - 1) / T;
+        int row_start = tid * boundary;
+        int row_end   = (tid + 1) * boundary;
+        if (row_end > x) row_end = x;
+
+        // Find index range in COO arrays for our assigned rows
+        int start_idx = 0;
+        while (start_idx < n && row[start_idx] < row_start) start_idx++;
+
+        int end_idx = start_idx;
+        while (end_idx < n && row[end_idx] < row_end) end_idx++;
+
+        // Accumulate into res[]
+        for (int i = start_idx; i < end_idx; i++) {
+            res[row[i]] += value[i] * arr[col[i]];
+        }
+    }
+}
+
+
+
+
+//give multiple thread to sub parts of the problem 
+
+int * coo_multiplication_OMP(int * row, int * col, int * value, int * res, int * arr, int n){
+    #pragma omp parallel for
+    for(int i = 0; i< n; i++){
+        int new_v = value[i] * arr[col[i]];
+        #pragma omp atomic                                        
+        res[row[i]] +=  new_v;
+    }
+    return res;
+}
+
 int * coo_multiplication(int * row, int * col, int * value, int * res, int * arr, int n){
     for(int i = 0; i< n; i++){
-        res[row[i]] = res[row[i]] + value[i] * arr[col[i]]; 
+        res[row[i]] += value[i] * arr[col[i]]; 
     }
     return res;
 }
@@ -556,7 +598,6 @@ int * coo_multiplication_binary_unrolled(int * row, int * col, int * value, int 
     return res;
 }
 
-#include <omp.h>
 
 int *coo_multiplication_b_u_OMP(int *row, int *col, int *value, int *res, int *arr, int n) {
     omp_set_num_threads(THREADS_N);
@@ -578,18 +619,21 @@ int *coo_multiplication_b_u_OMP(int *row, int *col, int *value, int *res, int *a
         for (int i = 0; i < n - 2; i += 2) {
             // First iteration
             if (arr[col[i + 1]] != 0) {
+                int new_v = value[i + 1] * arr[col[i + 1]];
                 #pragma omp atomic
-                res[row[i + 1]] +=  value[i + 1] * arr[col[i + 1]];
+                res[row[i + 1]] +=  new_v;
             }
             if (arr[col[i]] != 0) {
+                int new_v = value[i] * arr[col[i]];
                 #pragma omp atomic
-                res[row[i]] += value[i] * arr[col[i]];
+                res[row[i]] += new_v;
             }
         }
         // Last iteration (single element)
         if (arr[col[n - 1]] != 0) {
+            int new_v = value[n - 1] * arr[col[n - 1]];
             #pragma omp atomic
-            res[row[n - 1]] += value[n - 1] * arr[col[n - 1]];
+            res[row[n - 1]] += new_v;
         }
     }
 
