@@ -16,33 +16,33 @@ y=256
 p=1
 binary=1
 echo "${x} ${y} ${p} ${binary} - O3"
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
 x=512
 y=512
 p=1
 binary=1
 echo "${x} ${y} ${p} ${binary} - O3"
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
 x=1024
 y=1024
 p=1
 binary=1
 echo "${x} ${y} ${p} ${binary} - O3"
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
 x=2048
 y=2048
 p=1
 binary=1
 echo "${x} ${y} ${p} ${binary} - O3"
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
 x=5096
 y=5096
 p=1
 binary=1
 echo "${x} ${y} ${p} ${binary} - O3"
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
-./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
+srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 100
