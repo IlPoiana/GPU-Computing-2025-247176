@@ -14,7 +14,7 @@ y=10000
 p=100
 binary=1
 
-# remove the other flags
+# Test for random implementations and code scalability
 
 echo "${x} ${y} ${p} ${binary} - 1% - O3"
 srun ./obj/coo3 ${x} ${y} ${p} ${binary} 100 1000 1
