@@ -11,6 +11,7 @@
 module load CUDA/12.1.1
 make
 
-srun ./coo_rnd 2 2 1 1 0 1
-srun ./coo_rnd 3 1001 1 1 0 1
+srun ./coo_rnd 3 10 1 1 0 1
+srun ./coo_rnd 190 3 1 1 0 1
+srun ./coo_rnd 10000 10000 1 1 0 1
 
