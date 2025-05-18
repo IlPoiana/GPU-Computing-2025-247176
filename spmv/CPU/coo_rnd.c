@@ -6,6 +6,7 @@
 #include <math.h>
 #include "../lib.h"
 
+//TEST VERSION; USE _1 !!!
 
 int main(int argc, char *args[]){
     if (argc < 2 | argc < 3)
@@ -200,11 +201,11 @@ int main(int argc, char *args[]){
 
     for(int i = -warm_up; i< iterations; i++){
         if(i < 0 ){
-            COO_multiplication_row_OMP(row,col,value,res,arr, mtx.n, mtx.x);
+            coo_multiplication_row_OMP(row,col,value,res,arr, mtx.n, mtx.x);
         }
         else{
             START_CPU_TIMER(&time1);
-            COO_multiplication_row_OMP(row,col,value,res,arr, mtx.n,mtx.x);
+            coo_multiplication_row_OMP(row,col,value,res,arr, mtx.n,mtx.x);
             measures[i] = END_CPU_TIMER(&time1,&time2);
         }
     }

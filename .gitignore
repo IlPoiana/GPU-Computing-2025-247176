@@ -7,3 +7,7 @@ json/*
 json/
 cachegrind.*
 *.json
+mawi_201512020000_int.*
+delaunay_n24_bin.*
+oh2010_int.*
+Stanford_bin.*

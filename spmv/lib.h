@@ -236,99 +236,175 @@ struct matrix import_matrix(char * file_path){
     return sm;  
 }
 
-struct int_matrix import_int_matrix(char * file_path){
+struct int_matrix import_int_matrix(char *file_path) {
     FILE *file = fopen(file_path, "r");
 
-    // Check if the file was opened successfully
     if (file == NULL) {
         perror("Error opening file");
-        struct int_matrix err = {0,0,0,0,0};
+        struct int_matrix err = {0, 0, 0, NULL, NULL, NULL};
         return err;
     }
 
-    char myString[128] = "";
-    int init = 1; //flag for initialize the number of elements
-    
-    int x; int y; int n;
-    
-    int *row; int *col;int *val;
+    char line[128];
+    int x = 0, y = 0, n = 0;
+    int *row = NULL, *col = NULL, *val = NULL;
 
-    int index = 0;
-    // Read the content and print it
-    while(fgets(myString, 100, file)) {
-        
-        if(myString[0] == (char)37){}
-        //if for populating the dimensions(x,y,n) of the matrix
-        else if (init == 1){
-            char dimx[16] = ""; char dimy[16] = "";char nelem[16] = "";
-            int count = 3;
-            for(int i = 0; (int)myString[i] != '\n'; i++){
-                if((int)myString[i] != ' '){
-                    char temp[2] = {myString[i],'\0'};
-                    switch (count)
-                    {
-                    case 3:
-                        strcat(dimx, temp);
-                        break;
-                    case 2:
-                        strcat(dimy, temp); 
-                        break;
-                    case 1:
-                        strcat(nelem, temp);
-                        break;
-                    default:
-                        printf("why are you here!\n");
-                        break;
-                    }
-                }
-                else{
-                    count = count - 1;
-                }
-                 
+    // Read until you get dimensions
+    while (fgets(line, sizeof(line), file)) {
+        if (line[0] == '%') continue; // comment line
+        if (sscanf(line, "%d %d %d", &x, &y, &n) == 3) {
+            // allocate memory now
+            row = malloc(n * sizeof(int));
+            col = malloc(n * sizeof(int));
+            val = malloc(n * sizeof(int));
+            if (!row || !col || !val) {
+                perror("Memory allocation failed");
+                fclose(file);
+                struct int_matrix err = {0, 0, 0, NULL, NULL, NULL};
+                return err;
             }
-                init = 0;
-                x = atoi(dimx);y = atoi(dimy);n = atoi(nelem);
-                fflush(stdout);
-                row = (int*)malloc(sizeof(int) * n);
-                col = (int*)malloc(sizeof(int) * n);
-                val = (int*)malloc(sizeof(int) * n);
-        }
-        else{
-            int count = 3;
-            char xelem[16] = "";char yelem[16] = "";char valelem[16] = ""; 
-            for(int i = 0; (int)myString[i] != '\n'; i++){
-                if((int)myString[i] != ' '){
-                    char temp[2] = {myString[i],'\0'};
-                    switch (count)
-                    {
-                    case 3:
-                        strcat(xelem, temp);
-                        break;
-                    case 2:
-                        strcat(yelem, temp);
-                        break;
-                    case 1:
-                        strcat(valelem,temp);
-                        break;
-                    default:
-                        printf("why are you here!\n");
-                        break;
-                    }
-                }
-                else{
-                    count = count - 1;
-                }
-            }
-            row[index] = atoi(xelem);col[index] = atoi(yelem);val[index] = atoi(valelem);
-            index = index + 1;
+            break;
+        } else {
+            fprintf(stderr, "Invalid matrix dimension line format\n");
+            fclose(file);
+            struct int_matrix err = {0, 0, 0, NULL, NULL, NULL};
+            return err;
         }
     }
 
-    // Close the file after finishing
-    fclose(file);  
-    //switch col and row
-    struct int_matrix sm = {x,y,n,col, row, val};
-    return sm;  
+    int index = 0;
+    while (index < n && fgets(line, sizeof(line), file)) {
+        if (line[0] == '%') continue; // skip comments
+
+        int r, c, v;
+        if (sscanf(line, "%d %d %d", &r, &c, &v) == 3) {
+            row[index] = r;
+            col[index] = c;
+            val[index] = v;
+            index++;
+        } else {
+            fprintf(stderr, "Invalid matrix element line format at index %d\n", index);
+            // Handle error or skip line, here we abort:
+            free(row);
+            free(col);
+            free(val);
+            fclose(file);
+            struct int_matrix err = {0, 0, 0, NULL, NULL, NULL};
+            return err;
+        }
+    }
+
+    fclose(file);
+
+    struct int_matrix sm = {x, y, n, row, col,val}; // note: original swaps col and row here, preserve that if needed
+    return sm;
+}
+
+
+// struct int_matrix import_int_matrix(char * file_path){
+//     FILE *file = fopen(file_path, "r");
+
+//     // Check if the file was opened successfully
+//     if (file == NULL) {
+//         perror("Error opening file");
+//         struct int_matrix err = {0,0,0,0,0};
+//         return err;
+//     }
+
+//     char myString[128] = "";
+//     int init = 1; //flag for initialize the number of elements
+    
+//     int x; int y; int n;
+    
+//     int *row; int *col;int *val;
+
+//     int index = 0;
+//     // Read the content and print it
+//     while(fgets(myString, 100, file)) {
+        
+//         if(myString[0] == (char)37){}
+//         //if for populating the dimensions(x,y,n) of the matrix
+//         else if (init == 1){
+//             char dimx[16] = ""; char dimy[16] = "";char nelem[16] = "";
+//             int count = 3;
+//             for(int i = 0; (int)myString[i] != '\n'; i++){
+//                 if((int)myString[i] != ' '){
+//                     char temp[2] = {myString[i],'\0'};
+//                     switch (count)
+//                     {
+//                     case 3:
+//                         strcat(dimx, temp);
+//                         break;
+//                     case 2:
+//                         strcat(dimy, temp); 
+//                         break;
+//                     case 1:
+//                         strcat(nelem, temp);
+//                         break;
+//                     default:
+//                         printf("why are you here!\n");
+//                         break;
+//                     }
+//                 }
+//                 else{
+//                     count = count - 1;
+//                 }
+                 
+//             }
+//                 init = 0;
+//                 x = atoi(dimx);y = atoi(dimy);n = atoi(nelem);
+//                 fflush(stdout);
+//                 row = (int*)malloc(sizeof(int) * n);
+//                 col = (int*)malloc(sizeof(int) * n);
+//                 val = (int*)malloc(sizeof(int) * n);
+//         }
+//         else{
+//             int count = 3;
+//             char xelem[16] = "";char yelem[16] = "";char valelem[16] = ""; 
+//             for(int i = 0; (int)myString[i] != '\n'; i++){
+//                 if((int)myString[i] != ' '){
+//                     char temp[2] = {myString[i],'\0'};
+//                     printf("Here: %s\n",temp);
+//                     switch (count)
+//                     {
+//                     case 3:
+//                         strcat(xelem, temp);
+//                         break;
+//                     case 2:
+//                         strcat(yelem, temp);
+//                         break;
+//                     case 1:
+//                         strcat(valelem,temp);
+//                         break;
+//                     default:
+//                         printf("why are you here!\n");
+//                         break;
+//                     }
+//                 }
+//                 else{
+//                     count = count - 1;
+//                 }
+//             }
+//             row[index] = atoi(xelem);col[index] = atoi(yelem);val[index] = atoi(valelem);
+//             index = index + 1;
+//         }
+//     }
+
+//     // Close the file after finishing
+//     fclose(file);  
+//     //switch col and row
+//     struct int_matrix sm = {x,y,n,row, col,val};
+//     return sm;  
+// }
+
+struct int_matrix convert_to_int_mtx(struct matrix tmp){
+    struct int_matrix mtx = {tmp.x,tmp.y,tmp.n,tmp.row,tmp.col,NULL};
+    int * val = (int*)malloc(tmp.n * sizeof(int));
+    for(int i = 0; i < tmp.n; i++){
+        val[i] = 1;
+    }
+    mtx.val = val;
+    return mtx;
 }
 
 struct int_matrix convert_COO_CSR(struct int_matrix mtx){
