@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #SBATCH --job-name=CudaRnd
-#SBATCH --output=GPU_rnd_sparse%j.out
+#SBATCH --output=GPU_thread%j.out
 #SBATCH --error=my_error_%j.err
 #SBATCH --partition=edu-short
 #SBATCH --nodes=1
