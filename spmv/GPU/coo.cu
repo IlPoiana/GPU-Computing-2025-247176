@@ -5,6 +5,14 @@
 #include <time.h>
 #include <math.h>
 
+struct matrix{
+    int x;
+    int y;
+    int n;
+    int * row;
+    int * col;
+};
+
 struct int_matrix {
     int x;
     int y;
@@ -153,9 +161,9 @@ struct int_matrix import_int_matrix(char *file_path) {
         if (line[0] == '%') continue; // comment line
         if (sscanf(line, "%d %d %d", &x, &y, &n) == 3) {
             // allocate memory now
-            row = malloc(n * sizeof(int));
-            col = malloc(n * sizeof(int));
-            val = malloc(n * sizeof(int));
+            row = (int*)malloc(n * sizeof(int));
+            col = (int*)malloc(n * sizeof(int));
+            val = (int*)malloc(n * sizeof(int));
             if (!row || !col || !val) {
                 perror("Memory allocation failed");
                 fclose(file);
@@ -294,7 +302,7 @@ int main(int argc, char *args[]){
     int *row = mtx.row;
     int *col = mtx.col;
     int *value = mtx.val;
-    int *res = (int*)calloc(row_n, sizeof(int));
+    int *res = (int*)calloc(mtx.x, sizeof(int));
     int * arr = (int*)malloc(sizeof(int) * mtx.y);
     float * measures = (float*)malloc(sizeof(float) * iterations);
     float average = 0;

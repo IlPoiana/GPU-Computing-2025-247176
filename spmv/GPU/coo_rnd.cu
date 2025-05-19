@@ -232,6 +232,10 @@ int main(int argc, char *args[]){
         printf("tell the number of ITERATION rounds");
         return 0;
     }
+    if (argc < 8){
+        printf("tell the number of threads");
+        return 0;
+    }
     //random initializer
     srand(time(NULL));
 
@@ -243,6 +247,7 @@ int main(int argc, char *args[]){
     int binary = atoi(args[4]);
     int warm_up = atoi(args[5]);
     int iterations = atoi(args[6]);
+    int thread_n = atoi(args[7]);
     // printf("Passed arguments\nx: %d\ny: %d\np: %d\nbinary: %d\n\n",row_n,col_n,p,binary);
    
     
@@ -293,12 +298,10 @@ int main(int argc, char *args[]){
     cudaMemcpy(d_row, row, n * sizeof(int), cudaMemcpyHostToDevice);
     cudaMemcpy(d_col, col, n * sizeof(int), cudaMemcpyHostToDevice);
     
-    int block_n = (n / 256) + 1;
-    int thread_n = 256;
+    int block_n = (n / thread_n) + 1;
 
-    printf("non 0 elem: %d\n", mtx.n);
     //initialize json
-    printf("{\"x\":%d,\n\"y\":%d,\"n\":%d,\"runs\":{",mtx.x,mtx.y,mtx.n);
+    printf("{\"x\":%d,\n\"y\":%d,\"n\":%d,\"threads_n\":%d,\"runs\":{",mtx.x,mtx.y,mtx.n,thread_n);
 
     for(int i = -warm_up; i< iterations; i++){
         if(i < 0 ){

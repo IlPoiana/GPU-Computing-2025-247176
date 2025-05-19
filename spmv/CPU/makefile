@@ -6,7 +6,7 @@ all:dir COO CSR heap_comparison stack_comparison
 dir:
 	mkdir -p $(OBJ)
 COO:
-	gcc $(LIB) coo_rnd.c -o $(OBJ)coo $(FLAGS)
+	gcc $(LIB) coo.c -o $(OBJ)coo $(FLAGS) -O3
 COO_flags: dir COO
 	gcc $(LIB) coo_rnd.c -o $(OBJ)coo1 $(FLAGS) -O1
 	gcc $(LIB) coo_rnd.c -o $(OBJ)coo2 $(FLAGS) -O2
@@ -35,6 +35,6 @@ stack_comparison:
 clean: 
 	rm -r ./obj/*
 clean_out:
-	rm -r ./out/*
+	rm *.err && rm *.out
 clean_cache:
 	rm ./cachegrind.*
